@@ -1,39 +1,39 @@
-import React, { useEffect } from 'react'; // For Functions
-import 'bootstrap/dist/css/bootstrap.min.css'; // For BootStrap-Styling
-import './App.css'; // For internal styling
-//import backgroundImage from 'C:/Users/crist/Downloads/e-port.jpg'; // For background image
-import Elements from './Elements'; // Offcanvas
-import Logic from './Logic'; // Algorithm, Request and Response
-import TermsofUse from './TermsofUse'; // Modal
-import Quiz from './Quiz';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthForm from './Register';
+import Quiz from './Quiz';
+import Elements from './Elements';
+import Logic from './Logic';
+import TermsofUse from './TermsofUse';
+import ProtectedRoute from './protectedRoute';
+import { Container } from 'react-bootstrap';
+import './App.css';
+import NotAuthorized from './restrictions';
+import QuestionForm from './QuestionForm';
 
 function App() {
-
     useEffect(() => {
-        let root = document.getElementById('root'); // Get the root element
-        // root.style.backgroundImage = `url(${backgroundImage})`; // Set the background image
-        root.style.backgroundPosition = 'center';
-        root.style.backgroundRepeat = 'no-repeat'; // Set the background to !repeat
-        root.style.backgroundSize = 'cover'; // Set the background size to cover
-        root.style.height = '100vh'; // Set the height to 100% of the viewport height
+        const root = document.getElementById('root');
+        root.style.backgroundImage = 'url(./background.jpg)';
+        root.style.backgroundSize = 'cover';
+        root.style.height = '100vh';
     }, []);
 
-    //TO-DO: De finalizat Quiz-ul si de facut eventual un efect frumos asupra lui
-    //TO-DO: Research despre web design, ca momentan esti varza
-    //TO-DO: De adaugat logica din spatele quiz-ului, si oferirea unui raspuns personalizat.
-    //TO-DO: VALIDATE IP LIBRARY (URGENT) 
-    //TO-DO: De adaugat log-out pentru log-in actual.
 
     return (
         <div className="App">
-            <div id="center-content">
+            <Container>
                 <Router basename='/'>
                     <Routes>
                         <Route path="/auth/login" element={<AuthForm />} />
-
-                        <Route path="/quiz" element={<Quiz />} />
+                        <Route path="/quiz" element={
+                            <ProtectedRoute>
+                                <Quiz />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/questions" element={<QuestionForm />} />
+                        <Route path="/not-authorized" element={<NotAuthorized />} />
+                        <Route path="/questions" element={<QuestionForm />} />
                         <Route path="/" element={
                             <>
                                 <Elements />
@@ -43,7 +43,7 @@ function App() {
                         } />
                     </Routes>
                 </Router>
-            </div>
+            </Container>
         </div>
     );
 }

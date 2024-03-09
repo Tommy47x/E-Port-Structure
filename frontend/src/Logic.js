@@ -48,7 +48,7 @@ function Logic() {
     };
 
     return (
-        <Card style={{ width: '18rem' }}>
+        <Card style={{ maxWidth: '300px', margin: '0 auto' }}>
             <Card.Body>
                 <Card.Title>Network Scan</Card.Title>
                 <Card.Text>

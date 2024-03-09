@@ -1,6 +1,7 @@
 import React, { useState } from 'react'; // For Functions
 import { Offcanvas, Navbar, Alert, Nav } from 'react-bootstrap'; // Elements from Bootstrap
 
+
 function Elements() {
     const [show, setShow] = useState(false); // Set initial state to false 
     const handleClose = () => setShow(false); // OffCanvas closing
@@ -9,13 +10,12 @@ function Elements() {
     return (
         <>
 
-            <Navbar id="Bar" bg="dark" data-bs-theme="dark">
+            <Navbar id="Bar" bg="dark" data-bs-theme="dark" style={{ maxWidth: '300px', margin: '0 auto' }}>
                 <Navbar.Brand onClick={handleShow}>All ports</Navbar.Brand>
                 <Nav className="me-auto">
                     <Nav.Link href="#home">Home</Nav.Link>
-                    <Nav.Link href="/quiz">Security Quiz</Nav.Link>
+                    <Nav.Link href="/questions">Security Quiz</Nav.Link>
                 </Nav>
-
             </Navbar>
 
 
