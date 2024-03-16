@@ -7,8 +7,7 @@ const dbQueries = require('../db/dbQueries'); // Database queries (for the quiz)
 const app = express(); // Create the Express app
 const router = express.Router(); // Create the Express router
 const http = require('http'); // HTTP server
-const server = http.createServer({ maxHeaderSize: 8192 }, app); // Create the server
-server.listen(3000); // Listen on port 3000
+const { getQuestionsByQuizId } = require('../db/dbQueries');
 
 router.use(cors({
     origin: ['http://localhost:3001', 'http://localhost:3002']
@@ -58,29 +57,67 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
 });
-
-// function restrictToUserType(req, res, next) {
-//     // ... (rest of your restrictToUserType function code)
-// }
-
-app.post('/', async (req, res) => {
-    const { question, answer } = req.body;
-    console.log(question, answer);
+app.post('/quiz', async (req, res) => {
+    console.log(req.body);
     try {
-        const result = await dbQueries.insertQuestion(question, answer);
-        res.json(result);
+        switch (req.body.action) {
+            case 'createQuiz':
+                try {
+                    const quizId = await dbQueries.createQuiz(req.body.data.name, req.body.data.description);
+                    res.json({ quizId });
+                } catch (err) {
+                    res.status(500).json({ error: err.toString() });
+                }
+                break;
+            case 'insertQuestion':
+                try {
+                    await dbQueries.insertQuestion(req.body.data.quiz_id, req.body.data.question, req.body.data.questionOrder);
+                    res.json({ success: true });
+                } catch (err) {
+                    res.status(500).json({ error: err.toString() });
+                }
+                break;
+            case 'insertAnswer':
+                try {
+                    const question_id = parseInt(req.body.data.question_id);
+                    if (isNaN(question_id)) {
+                        res.status(400).json({ error: 'Invalid question_id' });
+                        return;
+                    }
+                    console.log(question_id);
+                    await dbQueries.insertAnswer(question_id, req.body.data.answer, req.body.data.is_correct);
+                    res.json({ success: true });
+                } catch (err) {
+                    res.status(500).json({ error: err.toString() });
+                }
+                break;
+            default:
+                res.status(400).json({ error: 'Invalid action' });
+        }
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'An error occurred while adding the question.' });
+        res.status(500).json({ error: err.toString() });
     }
 });
 
-// app.get('/quiz', restrictToUserType, (req, res) => {
-//     // ... (rest of your GET /quiz route code)
-// });
+app.get('/quiz', async (req, res) => {
+    try {
+        const data = await dbQueries.getQuiz();
+        res.json(data);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'An error occurred while fetching the quiz data' });
+    }
+});
 
-// app.listen(5000, function () {
-//     console.log('App listening on port 5000!');
-// });
+app.get('/questions', async (req, res) => {
+    const quiz_id = req.query.quiz_id;
+    const questions = await getQuestionsByQuizId(quiz_id);
+    res.json(questions);
+});
+
+
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
 
 module.exports = router;

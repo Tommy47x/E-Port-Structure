@@ -37,3 +37,9 @@ body{
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
       monospace;
   }
+   
+
+.button-margin {
+  margin-bottom: 2rem; 
+  margin-right: 2rem;
+}

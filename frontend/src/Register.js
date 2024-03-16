@@ -4,6 +4,7 @@ import { Form, Button, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Container } from 'react-bootstrap';
 import './App.css';
+
 //add carousel for the login page
 const AuthForm = () => {
     const [isLogin, setIsLogin] = useState(true);

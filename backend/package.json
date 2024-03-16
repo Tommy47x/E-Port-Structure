@@ -17,5 +17,9 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "~1.9.1",
     "node-nmap": "^4.0.0"
+  },
+  "devDependencies": {
+    "path": "^0.12.7",
+    "webpack": "^5.90.3"
   }
 }
