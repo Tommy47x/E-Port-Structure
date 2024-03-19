@@ -86,8 +86,13 @@ const getQuestionsByQuizId = async (quiz_id) => {
     return res.rows;
 };
 
+async function getAnswersByQuestionId(question_id) {
+    const res = await pool.query('SELECT * FROM AnswersTable WHERE question_id = $1 ORDER BY question_id', [question_id]);
+    return res.rows;
+}
 
 module.exports = {
+    getAnswersByQuestionId,
     createUser,
     getUserByUsername,
     createQuiz,

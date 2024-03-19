@@ -8,14 +8,36 @@ function QuestionForm() {
     const [questions, setQuestions] = useState([]);
     const [showModal, setShowModal] = useState(true);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [answers, setAnswers] = useState([]);
+    const [questionId, setQuestionId] = useState(null); // New state variable for questionId
 
-    const handleNextQuestion = () => {
-        if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
+    useEffect(() => {
+        const fetchAnswers = async () => {
+            const res = await fetch(`http://localhost:3000/questions?quiz_id=${quiz.id}`);
+            const data = await res.json();
+            setAnswers(data);
+
+        };
+
+        if (questions.length > 0) {
+            fetchAnswers();
         }
-    };
+    }, [questions, currentQuestionIndex]);
 
+    // Function to handle the next question
+    // Function to handle the next question
+    const handleNextQuestion = async () => {
+        if (currentQuestionIndex < questions.length - 2) { // Change here
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
+        } else if (currentQuestionIndex === questions.length - 2) { // And here
 
+            setCurrentQuestionIndex(currentQuestionIndex + 1); // Move to the next question
+        } else {
+            // Handle the case where there are no more questions
+            alert("There are no more questions left.");
+        }
+    }
+    // Fetch quizzes when the component mounts
     useEffect(() => {
         const fetchQuizzes = async () => {
             const response = await fetch('http://localhost:3000/quiz');
@@ -26,6 +48,7 @@ function QuestionForm() {
         fetchQuizzes();
     }, []);
 
+    // Fetch questions when a quiz is selected
     useEffect(() => {
         const fetchQuestions = async () => {
             if (quiz) {
@@ -38,6 +61,7 @@ function QuestionForm() {
         fetchQuestions();
     }, [quiz]);
 
+    // Function to handle the selection of a quiz
     const handleQuizSelect = (selectedQuiz) => {
         setQuiz(selectedQuiz);
         setShowModal(false);
@@ -54,7 +78,7 @@ function QuestionForm() {
                         <Button
                             key={quiz.id}
                             onClick={() => handleQuizSelect(quiz)}
-                            className="button-margin"  // Add this line
+                            className="button-margin"
                         >
                             {quiz.name}
                         </Button>
@@ -70,15 +94,19 @@ function QuestionForm() {
                             <Card.Text>{questions[currentQuestionIndex].question}</Card.Text>
                         )}
                         <Form>
-                            <Form.Group className="mb-3" controlId="formBasicCheckbox1">
-                                <Form.Check type="checkbox" label="Answer 1" />
-                            </Form.Group>
-                            <Form.Group className="mb-3" controlId="formBasicCheckbox2">
-                                <Form.Check type="checkbox" label="Answer 2" />
-                            </Form.Group>
-                            <Form.Group className="mb-3" controlId="formBasicCheckbox3">
-                                <Form.Check type="checkbox" label="Answer 3" />
-                            </Form.Group>
+                            {questions[currentQuestionIndex]?.answers?.map((answer) => (
+                                <Form.Check
+                                    key={answer.id}
+                                    type="checkbox"
+                                    label={answer.answer}
+                                    onChange={(e) => {
+                                        console.log(e.target.checked ? 'Answer selected' : 'Answer deselected');
+                                        if (e.target.checked) {
+                                            console.log(answer);
+                                        }
+                                    }}
+                                />
+                            ))}
                         </Form>
                         <Button variant="primary" className="mt-3" style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }} onClick={handleNextQuestion}>Next Question</Button>
                     </Card.Body>

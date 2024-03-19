@@ -1,4 +1,5 @@
 import { useState } from 'react'; import axios from 'axios';
+import { Container, Card, Button, InputGroup, Form } from 'react-bootstrap';
 
 function Quiz() {
     const [quizForm, setQuizForm] = useState({ name: '', description: '' });
@@ -25,7 +26,7 @@ function Quiz() {
             const response = await axios.post('http://localhost:3000/quiz', { action: 'createQuiz', data: quizForm });
             console.log(`Created quiz with ID: ${response.data.quizId}`);
             setQuestionForm({ ...questionForm, quiz_id: response.data.quizId });
-            setAnswerForm({ ...answerForm, question_id: response.data.quizId });
+            // Remove the line that sets question_id in answerForm here
         } catch (err) {
             console.error('Error creating quiz:', err);
         }
@@ -37,7 +38,7 @@ function Quiz() {
             console.log(response); // Log the entire response
             const questionId = response.data.questionId; // Get the questionId from the response
             console.log(`Inserted question with ID: ${questionId}`);
-            console.log(questionForm);
+            setAnswerForm({ ...answerForm, question_id: questionId }); // Set question_id in answerForm here
         } catch (err) {
             console.error('Error inserting question:', err);
         }
@@ -53,24 +54,42 @@ function Quiz() {
         }
     };
     return (
-        <div>
-            <form onSubmit={e => e.preventDefault()}>
-                <input type="text" name="name" value={quizForm.name} onChange={handleQuizChange} placeholder="Quiz Name" />
-                <input type="text" name="description" value={quizForm.description} onChange={handleQuizChange} placeholder="Quiz Description" />
-                <button type="button" onClick={handleCreateQuiz}>Create Quiz</button>
-            </form>
+        <Container className="mt-5">
+            <Card>
+                <Card.Body>
+                    <Form onSubmit={e => e.preventDefault()}>
+                        <InputGroup className="mb-3">
+                            <Form.Control type="text" name="name" value={quizForm.name} onChange={handleQuizChange} placeholder="Quiz Name" />
+                        </InputGroup>
+                        <InputGroup className="mb-3">
+                            <Form.Control type="text" name="description" value={quizForm.description} onChange={handleQuizChange} placeholder="Quiz Description" />
+                        </InputGroup>
 
-            <form onSubmit={e => e.preventDefault()}>
-                <input type="text" name="question" value={questionForm.question} onChange={handleQuestionChange} placeholder="Question" />
-                <button type="button" onClick={handleInsertQuestion}>Insert Question</button>
-            </form>
+                        <Button variant="primary" type="button" onClick={handleCreateQuiz}>Create Quiz</Button>
+                        <ul></ul>
+                    </Form>
 
-            <form onSubmit={e => e.preventDefault()}>
-                <input type="text" name="answer" value={answerForm.answer} onChange={handleAnswerChange} placeholder="Answer" />
-                <input type="checkbox" name="is_correct" checked={answerForm.is_correct} onChange={handleAnswerChange} /> Correct Answer
-                <button type="button" onClick={handleInsertAnswer}>Insert Answer</button>
-            </form>
-        </div>
+                    <Form onSubmit={e => e.preventDefault()}>
+                        <InputGroup className="mb-3">
+                            <Form.Control type="text" name="question" value={questionForm.question} onChange={handleQuestionChange} placeholder="Question" />
+                        </InputGroup>
+                        <Button variant="primary" type="button" onClick={handleInsertQuestion}>Insert Question</Button>
+                        <ul></ul>
+                    </Form>
+
+                    <Form onSubmit={e => e.preventDefault()}>
+                        <InputGroup className="mb-3">
+                            <Form.Control type="text" name="answer" value={answerForm.answer} onChange={handleAnswerChange} placeholder="Answer" />
+                        </InputGroup>
+                        <InputGroup className="mb-3">
+                            <InputGroup.Checkbox name="is_correct" checked={answerForm.is_correct} onChange={handleAnswerChange} /> Correct Answer
+                        </InputGroup>
+                        <Button variant="primary" type="button" onClick={handleInsertAnswer}>Insert Answer</Button>
+                        <ul></ul>
+                    </Form>
+                </Card.Body>
+            </Card>
+        </Container>
     );
     // Rest of your component...
 } export default Quiz;

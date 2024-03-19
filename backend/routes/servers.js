@@ -7,7 +7,7 @@ const dbQueries = require('../db/dbQueries'); // Database queries (for the quiz)
 const app = express(); // Create the Express app
 const router = express.Router(); // Create the Express router
 const http = require('http'); // HTTP server
-const { getQuestionsByQuizId } = require('../db/dbQueries');
+const { getQuestionsByQuizId, getAnswersByQuestionId } = require('../db/dbQueries');
 
 router.use(cors({
     origin: ['http://localhost:3001', 'http://localhost:3002']
@@ -16,6 +16,7 @@ router.use(cors({
 app.use(cors()); // Enable CORS for the app
 app.use(express.json()); // Enable JSON parsing for the app
 app.use('/auth', router); // Use the router for the /auth path
+
 
 
 
@@ -71,8 +72,8 @@ app.post('/quiz', async (req, res) => {
                 break;
             case 'insertQuestion':
                 try {
-                    await dbQueries.insertQuestion(req.body.data.quiz_id, req.body.data.question, req.body.data.questionOrder);
-                    res.json({ success: true });
+                    const questionId = await dbQueries.insertQuestion(req.body.data.quiz_id, req.body.data.question, req.body.data.questionOrder);
+                    res.json({ success: true, questionId });
                 } catch (err) {
                     res.status(500).json({ error: err.toString() });
                 }
@@ -110,10 +111,19 @@ app.get('/quiz', async (req, res) => {
 });
 
 app.get('/questions', async (req, res) => {
-    const quiz_id = req.query.quiz_id;
-    const questions = await getQuestionsByQuizId(quiz_id);
-    res.json(questions);
+    try {
+        const quiz_id = req.query.quiz_id;
+        const questions = await getQuestionsByQuizId(quiz_id);
+        for (let question of questions) {
+            question.answers = await getAnswersByQuestionId(question.id);
+        }
+        res.json(questions);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'An error occurred while fetching the quiz data' });
+    }
 });
+
 
 
 app.listen(3000, () => {
