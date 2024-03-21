@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Form, Container, Card, Button, Modal } from 'react-bootstrap';
-import './App.css';
+import '../App.css';
+import Progress from './Progress';
+
+
 
 function QuestionForm() {
     const [quiz, setQuiz] = useState(null);
@@ -9,7 +12,9 @@ function QuestionForm() {
     const [showModal, setShowModal] = useState(true);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState([]);
-    const [questionId, setQuestionId] = useState(null); // New state variable for questionId
+    const [selectedAnswerId, setSelectedAnswerId] = useState(null);
+    const [progress, setProgress] = useState(0);
+    const [totalQuestions, setTotalQuestions] = useState(0);
 
     useEffect(() => {
         const fetchAnswers = async () => {
@@ -25,8 +30,12 @@ function QuestionForm() {
     }, [questions, currentQuestionIndex]);
 
     // Function to handle the next question
-    // Function to handle the next question
     const handleNextQuestion = async () => {
+        const selectedAnswer = questions[currentQuestionIndex]?.answers?.find(answer => answer.id === selectedAnswerId);
+        console.log(selectedAnswer);
+        console.log(totalQuestions);
+        const progressPercentage = (currentQuestionIndex + 1) / totalQuestions * 100;
+        setProgress(progressPercentage);
         if (currentQuestionIndex < questions.length - 2) { // Change here
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         } else if (currentQuestionIndex === questions.length - 2) { // And here
@@ -55,6 +64,7 @@ function QuestionForm() {
                 const response = await fetch(`http://localhost:3000/questions?quiz_id=${quiz.id}`);
                 const data = await response.json();
                 setQuestions(data);
+                setTotalQuestions(data.length); // Here is where totalQuestions is updated
             }
         };
 
@@ -99,18 +109,27 @@ function QuestionForm() {
                                     key={answer.id}
                                     type="checkbox"
                                     label={answer.answer}
+                                    checked={selectedAnswerId === answer.id} // Check this checkbox if it's the selected answer
                                     onChange={(e) => {
-                                        console.log(e.target.checked ? 'Answer selected' : 'Answer deselected');
-                                        if (e.target.checked) {
-                                            console.log(answer);
+                                        if (selectedAnswerId === answer.id) {
+                                            // If this checkbox is already selected, deselect it
+                                            setSelectedAnswerId(null);
+                                        } else {
+                                            // Otherwise, select this checkbox
+                                            setSelectedAnswerId(answer.id);
+
                                         }
                                     }}
                                 />
                             ))}
                         </Form>
-                        <Button variant="primary" className="mt-3" style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }} onClick={handleNextQuestion}>Next Question</Button>
+                        <Button variant="primary" className="mt-3" style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }} onClick={handleNextQuestion} disabled={selectedAnswerId === null}>Next Question</Button>
+                        <ul></ul>
+                        <Progress progress={progress} />
+
                     </Card.Body>
                 </Card>}
+
             </Container>
         </>
     );

@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import AuthForm from './Register';
-import Quiz from './Quiz';
+import AuthForm from './User/Register';
+import Quiz from './Quiz/Quiz';
 import Elements from './Elements';
 import Logic from './Logic';
 import TermsofUse from './TermsofUse';
-import ProtectedRoute from './protectedRoute';
+import ProtectedRoute from './User/protectedRoute';
 import { Container } from 'react-bootstrap';
 import './App.css';
-import NotAuthorized from './restrictions';
-import QuestionForm from './QuestionForm';
+import NotAuthorized from './User/restrictions';
+import QuestionForm from './Quiz/QuestionForm';
 
 function App() {
     useEffect(() => {
