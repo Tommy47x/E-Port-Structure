@@ -124,7 +124,14 @@ app.get('/questions', async (req, res) => {
     }
 });
 
+app.post('/questions', async (req, res) => {
+    const userId = req.body.userId;
+    const selectedAnswers = req.body.selectedAnswers;
 
+    // Save the selected answers in your database...
+
+    res.status(200).send('Answers saved successfully');
+});
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
