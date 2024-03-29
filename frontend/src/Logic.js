@@ -56,7 +56,7 @@ function Logic() {
                 </Card.Text>
                 <Form.Control type="text" placeholder="Enter IP address" value={ipAddress} onChange={handleIpChange} />
                 <ul></ul>
-                <Button variant='dark' onClick={handleScan}>Start Scan</Button>
+                <Button variant='light' onClick={handleScan}>Start Scan</Button>
                 <ul></ul>
                 {scanData && (
                     <div>

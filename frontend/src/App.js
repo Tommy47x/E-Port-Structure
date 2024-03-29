@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AuthForm from './User/Register';
 import Quiz from './Quiz/Quiz';
 import Elements from './Elements';
-import Logic from './Logic';
 import TermsofUse from './TermsofUse';
 import ProtectedRoute from './User/protectedRoute';
 import { Container } from 'react-bootstrap';
@@ -37,7 +36,7 @@ function App() {
                         <Route path="/" element={
                             <>
                                 <Elements />
-                                <Logic />
+
                                 <TermsofUse />
                             </>
                         } />

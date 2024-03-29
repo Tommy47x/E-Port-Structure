@@ -8,6 +8,7 @@ const app = express(); // Create the Express app
 const router = express.Router(); // Create the Express router
 const http = require('http'); // HTTP server
 const { getQuestionsByQuizId, getAnswersByQuestionId } = require('../db/dbQueries');
+const { insertUserAnswer } = require('../db/dbQueries');
 
 router.use(cors({
     origin: ['http://localhost:3001', 'http://localhost:3002']
@@ -47,9 +48,9 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
         if (user.role === 'admin') {
-            res.json({ token, role: user.role });
+            res.json({ token, role: user.role, id: user.id });
         } else if (user.role === 'user') {
-            res.json({ token, role: user.role });
+            res.json({ token, role: user.role, id: user.id });
         } else if (user.role === "admin") {
             res.redirect('https://localhost:3001/quiz');
         }
@@ -124,14 +125,30 @@ app.get('/questions', async (req, res) => {
     }
 });
 
+
 app.post('/questions', async (req, res) => {
-    const userId = req.body.userId;
-    const selectedAnswers = req.body.selectedAnswers;
+    const { userId, selectedAnswers, questions } = req.body;
 
-    // Save the selected answers in your database...
+    try {
+        await Promise.all(selectedAnswers.map(async (selectedAnswer) => {
+            const question = questions.find(q => q.question === selectedAnswer.question);
+            if (question) {
+                const questionId = question.id;
+                const answer = question.answers.find(a => a.answer === selectedAnswer.selectedAnswer);
+                if (answer) {
+                    await dbQueries.insertUserAnswer(userId, questionId, answer.answer);
+                }
+            }
+        }));
 
-    res.status(200).send('Answers saved successfully');
+        res.send('Quiz submitted successfully');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error inserting user answer into database');
+    }
 });
+
+
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');

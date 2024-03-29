@@ -27,8 +27,10 @@ const AuthForm = () => {
             setIsAuthenticated(true); // set isAuthenticated to true after successful login/register
             setIsAdmin(response.data.role === 'admin'); // set isAdmin based on the response data
 
-            // Store the role in local storage
+            // Store the role and username in local storage
             localStorage.setItem('role', response.data.role);
+            localStorage.setItem('username', formData.username);
+            localStorage.setItem('id', response.data.id);
         } catch (err) {
             console.log(blob.size);
             setError(err.response ? err.response.data.error : 'Something went wrong');
@@ -36,8 +38,11 @@ const AuthForm = () => {
     };
 
     const handleLogout = () => {
-        // Remove the token from local storage or cookie
+        // Remove the token, role, and username from local storage
         localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('username');
+        localStorage.removeItem('id');
         // Update the authentication status
         setIsAuthenticated(false);
         setIsAdmin(false); // reset the admin status on logout

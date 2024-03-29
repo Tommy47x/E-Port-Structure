@@ -91,7 +91,24 @@ async function getAnswersByQuestionId(question_id) {
     return res.rows;
 }
 
+async function insertUserAnswer(userId, questionId, answer) {
+    const answeredAt = new Date();
+    const query = `
+        INSERT INTO user_answers (user_id, question_id, answer)
+        VALUES ($1, $2, $3)
+    `;
+    const values = [userId, questionId, answer];
+
+    try {
+        await pool.query(query, values);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
 module.exports = {
+    insertUserAnswer,
     getAnswersByQuestionId,
     createUser,
     getUserByUsername,

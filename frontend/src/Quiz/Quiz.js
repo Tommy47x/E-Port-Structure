@@ -37,6 +37,7 @@ function Quiz() {
             const response = await axios.post('http://localhost:3000/quiz', { action: 'insertQuestion', data: questionForm });
             console.log(response); // Log the entire response
             const questionId = response.data.questionId; // Get the questionId from the response
+
             console.log(`Inserted question with ID: ${questionId}`);
             setAnswerForm({ ...answerForm, question_id: questionId }); // Set question_id in answerForm here
         } catch (err) {
@@ -91,5 +92,5 @@ function Quiz() {
             </Card>
         </Container>
     );
-    // Rest of your component...
+
 } export default Quiz;

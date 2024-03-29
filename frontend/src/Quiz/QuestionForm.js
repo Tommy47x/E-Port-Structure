@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Form, Container, Card, Button, Modal } from 'react-bootstrap';
 import '../App.css';
 import Progress from './Progress';
-import { jwtDecode } from 'jwt-decode';
 import QuizResults from './QuizResults';
+import Spinner from 'react-bootstrap/Spinner';
+
 
 function QuestionForm() {
     const [quiz, setQuiz] = useState(null);
@@ -18,94 +19,13 @@ function QuestionForm() {
     const [selectedAnswers, setSelectedAnswers] = useState([]);
     const [quizFinished, setQuizFinished] = useState(false);
 
-    function getUserId() {
-        // Get the token from local storage
-        const token = localStorage.getItem('token');
-
-        // Decode the token and return the user ID
-        if (token) {
-            const decodedToken = jwtDecode(token);
-            return decodedToken.id;
-        }
-
-        // Return null if there's no token
-        return null;
-    }
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        console.log(selectedAnswers);
-        // This is where you get the user's ID
-        // Replace this with the actual code that gets the user's ID
-        const userId = getUserId();
-
-        // Make a POST request to the /save-answers endpoint
-        const response = await fetch('http://localhost:3000/questions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                userId: userId,
-                selectedAnswers: selectedAnswers
-            })
-        });
-
-        // Check if the request was successful
-        if (response.ok) {
-            console.log('Answers saved successfully');
-        } else {
-            console.error('An error occurred while saving the answers');
-        }
+    const handleQuizSelect = (selectedQuiz) => { // First component that renders (Quiz Selector inside Modal)
+        setQuiz(selectedQuiz);
+        setShowModal(false);
     };
 
-
     useEffect(() => {
-        const fetchAnswers = async () => {
-            const res = await fetch(`http://localhost:3000/questions?quiz_id=${quiz.id}`);
-            const data = await res.json();
-            setAnswers(data);
-
-        };
-
-        if (questions.length > 0) {
-            fetchAnswers();
-        }
-    }, [questions, currentQuestionIndex]);
-
-    // Function to handle the next question
-    const handleNextQuestion = async () => {
-        const selectedAnswer = questions[currentQuestionIndex]?.answers?.find(answer => answer.id === selectedAnswerId);
-        //console.log(selectedAnswer);
-        // console.log(totalQuestions);
-        const selectedResponse = {
-            question: questions[currentQuestionIndex].question,
-            selectedAnswer: selectedAnswer.answer,
-            is_correct: selectedAnswer.is_correct
-        };
-        const progressPercentage = (currentQuestionIndex + 1) / totalQuestions * 100;
-        setProgress(progressPercentage);
-        setSelectedAnswers([...selectedAnswers, selectedResponse]);
-        if (currentQuestionIndex < questions.length - 2) { // Change here
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-        } else if (currentQuestionIndex === questions.length - 2) { // And here
-
-            setCurrentQuestionIndex(currentQuestionIndex + 1); // Move to the next question
-        } else {
-            if (currentQuestionIndex === questions.length - 1) {
-                // Handle the case where there are no more questions
-                alert("There are no more questions left.");
-                setQuizFinished(true);
-                // Display the selected answers
-                selectedAnswers.forEach((answer, index) => {
-                    //       console.log(`Question ${index + 1}: ${answer.answer} ${answer.is_correct ? '(correct)' : '(incorrect)'}`);
-                });
-            }
-        }
-    }
-    // Fetch quizzes when the component mounts
-    useEffect(() => {
-        const fetchQuizzes = async () => {
+        const fetchQuizzes = async () => { // Second component that renders (Modal with Quiz Selector)
             const response = await fetch('http://localhost:3000/quiz');
             const data = await response.json();
             setQuizzes(data);
@@ -114,29 +34,115 @@ function QuestionForm() {
         fetchQuizzes();
     }, []);
 
-    // Fetch questions when a quiz is selected
     useEffect(() => {
-        const fetchQuestions = async () => {
+        const fetchQuestions = async () => { // Third component that renders (Quiz Questions)
             if (quiz) {
                 const response = await fetch(`http://localhost:3000/questions?quiz_id=${quiz.id}`);
                 const data = await response.json();
                 setQuestions(data);
-                setTotalQuestions(data.length); // Here is where totalQuestions is updated
+                setTotalQuestions(data.length);
             }
         };
 
         fetchQuestions();
     }, [quiz]);
 
-    // Function to handle the selection of a quiz
-    const handleQuizSelect = (selectedQuiz) => {
-        setQuiz(selectedQuiz);
-        setShowModal(false);
+    useEffect(() => { // Fourth component that renders  (Quiz Answers)
+        const fetchAnswers = async () => {
+            const res = await fetch(`http://localhost:3000/questions?quiz_id=${quiz.id}`);
+            const data = await res.json();
+            setAnswers(data);
+        };
+
+        if (questions.length > 0) {
+            fetchAnswers();
+        }
+    }, [questions, currentQuestionIndex]);
+
+
+    function getUserId() { // Helper function to get the user ID from localStorage
+        const id = localStorage.getItem('id');
+        if (id) {
+            return id;
+        }
+    }
+
+    function getUserSubmissions() { // Helper function to get the user's submissions
+        const submissions = questions.map((question, index) => {
+            const selectedAnswer = questions[currentQuestionIndex]?.answers?.find(answer => answer.id === selectedAnswerId);
+            if (!selectedAnswer) {
+                console.error(`No answer found with id ${selectedAnswerId}`);
+                return;
+            }
+            if (!selectedAnswer) { // Debug
+                console.error(`No answer found for question at index ${index} with answer id ${selectedAnswerId}`);
+                console.log(`selectedAnswerId: ${selectedAnswerId}`);
+                console.log(`answers: ${JSON.stringify(question.answers)}`);
+                return null;
+            }
+            return { // Transfer to BE
+                question: question.question,
+                selectedAnswer: selectedAnswer.answer,
+                is_correct: selectedAnswer.is_correct
+            };
+        }).filter(Boolean); // This will remove any null values from the array
+        return submissions;
+    }
+
+    const handleSubmit = async (selectedAnswers) => { // Function to submit the answers to the backend
+        const userId = getUserId();
+        const userData = getUserSubmissions();
+        const response = await fetch('http://localhost:3000/questions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: userId,
+                selectedAnswers: selectedAnswers,
+                userData: userData,
+                questions: questions
+            })
+        });
+
+        if (response.ok) { // Check if the response is OK
+            console.log('Answers saved successfully');
+        } else {
+            console.error('An error occurred while saving the answers');
+        }
     };
+
+    const handleNextQuestion = async () => { // Function to handle the next question
+        const selectedAnswer = questions[currentQuestionIndex]?.answers?.find(answer => answer.id === selectedAnswerId);
+        if (!selectedAnswer) {
+            console.error(`No answer found for question at index ${currentQuestionIndex} with answer id ${selectedAnswerId}`);
+            return;
+        }
+        const selectedResponse = {
+            question: questions[currentQuestionIndex].question,
+            selectedAnswer: selectedAnswer.answer,
+            is_correct: selectedAnswer.is_correct
+        };
+        const progressPercentage = (currentQuestionIndex + 1) / totalQuestions * 100;
+        setProgress(progressPercentage);
+        setSelectedAnswers([...selectedAnswers, selectedResponse]);
+        if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
+            setSelectedAnswerId(null);
+        } else {
+            alert("There are no more questions left.");
+            setQuizFinished(true);
+            handleSubmit([...selectedAnswers, selectedResponse]).catch(error => {
+                console.error('An error occurred:', error);
+            });
+        }
+    }
+
+
 
     return (
         <>
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal bg="dark" data-bs-theme="dark" show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Select a Quiz</Modal.Title>
                 </Modal.Header>
@@ -146,18 +152,18 @@ function QuestionForm() {
                             key={quiz.id}
                             onClick={() => handleQuizSelect(quiz)}
                             className="button-margin"
+                            variant='light'
                         >
                             {quiz.name}
                         </Button>
                     ))}
                 </Modal.Body>
             </Modal>
-
             <Container className="d-flex justify-content-center">
                 {quizFinished ? (
                     <QuizResults responses={selectedAnswers} />
                 ) : (
-                    <Card style={{ width: '30rem' }} className="mt-5">
+                    <Card style={{ width: '30rem' }} className="mt-5" bg="dark" data-bs-theme="dark">
                         <Card.Body>
                             <Card.Title>{quiz ? `${quiz.id} | ${quiz.name}` : 'Loading...'}</Card.Title>
                             {questions.length > 0 && (
@@ -171,6 +177,7 @@ function QuestionForm() {
                                         label={answer.answer}
                                         checked={selectedAnswerId === answer.id} // Check this checkbox if it's the selected answer
                                         onChange={(e) => {
+                                            console.log(`Checkbox for answer id ${answer.id} was checked.`);
                                             if (selectedAnswerId === answer.id) {
                                                 // If this checkbox is already selected, deselect it
                                                 setSelectedAnswerId(null);
@@ -181,7 +188,22 @@ function QuestionForm() {
                                         }}
                                     />
                                 ))}
-                                <Button type="submit" variant="primary" className="mt-3" style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }} onClick={handleNextQuestion} disabled={selectedAnswerId === null}>Next Question</Button>
+                                <Button type="submit" variant="light" className="mt-3" style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }} onClick={handleNextQuestion} disabled={selectedAnswerId === null}>
+                                    {selectedAnswerId === null ? (
+                                        <>
+                                            <Spinner
+                                                as="span"
+                                                animation="grow"
+                                                size="sm"
+                                                role="status"
+                                                aria-hidden="true"
+                                            />
+                                            Loading...
+                                        </>
+                                    ) : (
+                                        'Next Question'
+                                    )}
+                                </Button>
                             </Form>
                             <ul></ul>
                             <Progress progress={progress} />

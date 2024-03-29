@@ -22,9 +22,13 @@
     justify-content: center;
 }
 
+.modal-title {
+  color:aliceblue;
+}
+
 body{
     color:black;
-    background-color: #FFE4E1;
+    background-color: #36454F;
     margin:0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
