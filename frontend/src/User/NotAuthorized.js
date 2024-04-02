@@ -61,11 +61,11 @@ const AuthForm = () => {
                     <h1>{isLogin ? 'Login' : 'Register'}</h1>
                     {error && <Alert variant="danger">{error}</Alert>}
                     <Form onSubmit={handleSubmit}>
-                        <Form.Group controlId="username">
+                        <Form.Group controlId="username" bg="dark" data-bs-theme="dark">
                             <Form.Label>Username</Form.Label>
                             <Form.Control style={{ width: '200px' }} type="text" name="username" value={formData.username} onChange={handleInputChange} required />
                         </Form.Group>
-                        <Form.Group controlId="password">
+                        <Form.Group controlId="password" bg="dark" data-bs-theme="dark">
                             <Form.Label>Password</Form.Label>
                             <Form.Control style={{ width: '200px' }} type="password" name="password" value={formData.password} onChange={handleInputChange} required />
                         </Form.Group>
@@ -75,14 +75,14 @@ const AuthForm = () => {
                     </Form>
                     <ul></ul>
                     <Container>
-                        <Card style={{ maxWidth: '230px', margin: '0 auto', marginLeft: '-20px', backgroundColor: '#FFE4E1' }}>
+                        <Card style={{ maxWidth: '230px', margin: '0 auto', marginLeft: '-20px' }} bg="dark" data-bs-theme="dark">
                             <Card.Body>
                                 <Card.Title>Welcome to E-Port!</Card.Title>
                                 <Card.Text>
                                     This login is for admins only. If you are a user, please use the navigate button.
                                 </Card.Text>
                                 <ul></ul>
-                                <Button variant='dark' onClick={() => window.location.href = 'http://localhost:3001'}>Navigate</Button>
+                                <Button variant='light' onClick={() => window.location.href = 'http://localhost:3001'}>Navigate</Button>
                                 <ul></ul>
 
                             </Card.Body>

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Form, Container, Card, Button, Modal } from 'react-bootstrap';
+import { Form, Container, Card, Button, Modal, Row, Col } from 'react-bootstrap';
 import '../App.css';
 import Progress from './Progress';
 import QuizResults from './QuizResults';
 import Spinner from 'react-bootstrap/Spinner';
 
 
-function QuestionForm() {
+function CreateQuiz() {
     const [quiz, setQuiz] = useState(null);
     const [quizzes, setQuizzes] = useState([]);
     const [questions, setQuestions] = useState([]);
@@ -18,6 +18,7 @@ function QuestionForm() {
     const [totalQuestions, setTotalQuestions] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState([]);
     const [quizFinished, setQuizFinished] = useState(false);
+
 
     const handleQuizSelect = (selectedQuiz) => { // First component that renders (Quiz Selector inside Modal)
         setQuiz(selectedQuiz);
@@ -140,6 +141,7 @@ function QuestionForm() {
 
 
 
+
     return (
         <>
             <Modal bg="dark" data-bs-theme="dark" show={showModal} onHide={() => setShowModal(false)}>
@@ -147,16 +149,22 @@ function QuestionForm() {
                     <Modal.Title>Select a Quiz</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {quizzes.map((quiz) => (
-                        <Button
-                            key={quiz.id}
-                            onClick={() => handleQuizSelect(quiz)}
-                            className="button-margin"
-                            variant='light'
-                        >
-                            {quiz.name}
-                        </Button>
-                    ))}
+                    <Row>
+                        {quizzes.map((quiz) => (
+                            <Col key={quiz.id}>
+                                <Card style={{ className: 'mt-5' }}>
+                                    <Card.Img variant="top" src="https://www.pcworld.com/wp-content/uploads/2023/04/shutterstock_555325381-secure-home-wifi-100901207-orig.jpg?quality=50&strip=all" />
+                                    <Card.Body>
+                                        <Card.Title>{quiz.name}</Card.Title>
+                                        <Card.Text>
+                                            {quiz.description}
+                                        </Card.Text>
+                                        <Button variant="light" onClick={() => handleQuizSelect(quiz)}>Select Quiz</Button>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
                 </Modal.Body>
             </Modal>
             <Container className="d-flex justify-content-center">
@@ -215,4 +223,4 @@ function QuestionForm() {
     );
 }
 
-export default QuestionForm;
+export default CreateQuiz;

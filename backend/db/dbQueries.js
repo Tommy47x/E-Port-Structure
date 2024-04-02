@@ -46,14 +46,14 @@ async function insertQuestion(quizId, question) {
     const client = await pool.connect();
     try {
         // Fetch the maximum question_order for the given quizId
-        const res = await client.query('SELECT MAX(question_order) FROM QuizzTable WHERE quiz_id = $1', [quizId]);
+        const res = await client.query('SELECT MAX(question_order) FROM QuizzQuestions WHERE quiz_id = $1', [quizId]);
         const maxOrder = res.rows[0].max;
 
         // If maxOrder is null, this is the first question for the quiz, so we start at 1.
         // Otherwise, we increment maxOrder by 1.
         const questionOrder = maxOrder === null ? 1 : maxOrder + 1;
 
-        const insertQuestionQuery = await client.query('INSERT INTO QuizzTable (question, quiz_id, question_order) VALUES ($1, $2, $3) RETURNING id', [question, quizId, questionOrder]);
+        const insertQuestionQuery = await client.query('INSERT INTO QuizzQuestions (question, quiz_id, question_order) VALUES ($1, $2, $3) RETURNING id', [question, quizId, questionOrder]);
         const questionId = insertQuestionQuery.rows[0].id;
         return questionId;
     } catch (err) {
@@ -66,7 +66,7 @@ async function insertQuestion(quizId, question) {
 async function insertAnswer(questionId, answer, isCorrect) {
     const client = await pool.connect();
     try {
-        const insertAnswerQuery = await client.query('INSERT INTO AnswersTable (question_id, answer, is_correct) VALUES ($1, $2, $3) RETURNING id', [questionId, answer, isCorrect]);
+        const insertAnswerQuery = await client.query('INSERT INTO QuizzAnswers (question_id, answer, is_correct) VALUES ($1, $2, $3) RETURNING id', [questionId, answer, isCorrect]);
         const answerId = insertAnswerQuery.rows[0].id;
         return answerId;
     } catch (err) {
@@ -82,12 +82,12 @@ const getQuiz = async () => { // Front-end display Quiz-Selector
 };
 
 const getQuestionsByQuizId = async (quiz_id) => {
-    const res = await pool.query('SELECT * FROM QuizzTable WHERE quiz_id = $1 ORDER BY question_order', [quiz_id]);
+    const res = await pool.query('SELECT * FROM QuizzQuestions WHERE quiz_id = $1 ORDER BY question_order', [quiz_id]);
     return res.rows;
 };
 
 async function getAnswersByQuestionId(question_id) {
-    const res = await pool.query('SELECT * FROM AnswersTable WHERE question_id = $1 ORDER BY question_id', [question_id]);
+    const res = await pool.query('SELECT * FROM QuizzAnswers WHERE question_id = $1 ORDER BY question_id', [question_id]);
     return res.rows;
 }
 

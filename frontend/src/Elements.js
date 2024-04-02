@@ -1,5 +1,5 @@
 import React, { useState } from 'react'; // For Functions
-import { Offcanvas, Navbar, Alert, Nav } from 'react-bootstrap'; // Elements from Bootstrap
+import { Offcanvas, Navbar, Alert, Nav, Card, Button, Row, Col } from 'react-bootstrap'; // Elements from Bootstrap
 import Accordion from 'react-bootstrap/Accordion';
 import './App.css'; // CSS file
 import Logic from './Logic';
@@ -23,11 +23,13 @@ function Elements() {
                             </Nav>
                         </Navbar>
                         <Logic></Logic>
+                        <br></br>
+
                     </Accordion.Body>
                 </Accordion.Item>
             </Accordion>
 
-            <Offcanvas show={show} onHide={handleClose}>
+            <Offcanvas show={show} onHide={handleClose} bg="dark" data-bs-theme="dark">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Ports and their meanings:</Offcanvas.Title>
                 </Offcanvas.Header>

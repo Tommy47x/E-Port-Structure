@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import AuthForm from './User/Register';
+import AuthForm from './User/NotAuthorized';
 import Quiz from './Quiz/Quiz';
 import Elements from './Elements';
 import TermsofUse from './TermsofUse';
@@ -8,7 +8,7 @@ import ProtectedRoute from './User/protectedRoute';
 import { Container } from 'react-bootstrap';
 import './App.css';
 import NotAuthorized from './User/restrictions';
-import QuestionForm from './Quiz/QuestionForm';
+import CreateQuiz from './Quiz/CreateQuiz';
 
 function App() {
     useEffect(() => {
@@ -30,9 +30,9 @@ function App() {
                                 <Quiz />
                             </ProtectedRoute>
                         } />
-                        <Route path="/questions" element={<QuestionForm />} />
+                        <Route path="/questions" element={<CreateQuiz />} />
                         <Route path="/not-authorized" element={<NotAuthorized />} />
-                        <Route path="/questions" element={<QuestionForm />} />
+                        <Route path="/questions" element={<CreateQuiz />} />
                         <Route path="/" element={
                             <>
                                 <Elements />
