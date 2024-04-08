@@ -2,11 +2,16 @@ import { useState } from 'react'; import axios from 'axios';
 import { Container, Card, Button, InputGroup, Form } from 'react-bootstrap';
 
 function Quiz() {
+    const [responseForm, setResponseForm] = useState({ response: '' });
     const [quizForm, setQuizForm] = useState({ name: '', description: '' });
     const [questionForm, setQuestionForm] = useState({ question: '', quiz_id: '' });
     const [answerForm, setAnswerForm] = useState({ answer: '', question_id: '', is_correct: false });
     const handleQuizChange = (e) => {
         setQuizForm({ ...quizForm, [e.target.name]: e.target.value });
+    };
+
+    const handleResponseChange = (e) => {
+        setResponseForm({ ...responseForm, [e.target.name]: e.target.value });
     };
 
     const handleQuestionChange = (e) => {
@@ -47,13 +52,25 @@ function Quiz() {
 
     const handleInsertAnswer = async () => {
         try {
-            const response = await axios.post('http://localhost:3000/quiz', { action: 'insertAnswer', data: answerForm });
+            const response = await axios.post('http://localhost:3000/quiz', {
+                action: 'insertAnswer',
+                data: {
+                    ...answerForm,
+                    response: responseForm.response
+                }
+            });
+
+            if (responseForm.response) {
+                console.log(responseForm.response);
+            }
             console.log(`Inserted answer with ID: ${response.data.quizId}`);
         } catch (err) {
             console.error('Error inserting answer:', err);
             console.log(answerForm);
         }
     };
+
+
     return (
         <Container className="mt-5">
             <Card>
@@ -81,6 +98,9 @@ function Quiz() {
                     <Form onSubmit={e => e.preventDefault()}>
                         <InputGroup className="mb-3">
                             <Form.Control type="text" name="answer" value={answerForm.answer} onChange={handleAnswerChange} placeholder="Answer" />
+                        </InputGroup>
+                        <InputGroup className="mb-3">
+                            <Form.Control type="text" name="response" value={responseForm.response} onChange={handleResponseChange} placeholder="Response" />
                         </InputGroup>
                         <InputGroup className="mb-3">
                             <InputGroup.Checkbox name="is_correct" checked={answerForm.is_correct} onChange={handleAnswerChange} /> Correct Answer

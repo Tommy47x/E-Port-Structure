@@ -26,7 +26,7 @@ async function createQuiz(name, description) {
     try {
         await client.query('BEGIN'); // Start transaction for consistency
 
-        const insertQuizQuery = await client.query('INSERT INTO Quizzes (name, description) VALUES ($1, $2) RETURNING id', [name, description]);
+        const insertQuizQuery = await client.query('INSERT INTO Quizes (name, description) VALUES ($1, $2) RETURNING id', [name, description]);
         const quizId = insertQuizQuery.rows[0].id;
         console.log(quizId);
 
@@ -46,14 +46,14 @@ async function insertQuestion(quizId, question) {
     const client = await pool.connect();
     try {
         // Fetch the maximum question_order for the given quizId
-        const res = await client.query('SELECT MAX(question_order) FROM QuizzQuestions WHERE quiz_id = $1', [quizId]);
+        const res = await client.query('SELECT MAX(question_order) FROM QuizQuestions WHERE quiz_id = $1', [quizId]);
         const maxOrder = res.rows[0].max;
 
         // If maxOrder is null, this is the first question for the quiz, so we start at 1.
         // Otherwise, we increment maxOrder by 1.
         const questionOrder = maxOrder === null ? 1 : maxOrder + 1;
 
-        const insertQuestionQuery = await client.query('INSERT INTO QuizzQuestions (question, quiz_id, question_order) VALUES ($1, $2, $3) RETURNING id', [question, quizId, questionOrder]);
+        const insertQuestionQuery = await client.query('INSERT INTO QuizQuestions (question, quiz_id, question_order) VALUES ($1, $2, $3) RETURNING id', [question, quizId, questionOrder]);
         const questionId = insertQuestionQuery.rows[0].id;
         return questionId;
     } catch (err) {
@@ -63,10 +63,10 @@ async function insertQuestion(quizId, question) {
     }
 }
 
-async function insertAnswer(questionId, answer, isCorrect) {
+async function insertAnswer(questionId, answer, isCorrect, response) {
     const client = await pool.connect();
     try {
-        const insertAnswerQuery = await client.query('INSERT INTO QuizzAnswers (question_id, answer, is_correct) VALUES ($1, $2, $3) RETURNING id', [questionId, answer, isCorrect]);
+        const insertAnswerQuery = await client.query('INSERT INTO QuizAnswers (question_id, answer, is_correct, response) VALUES ($1, $2, $3, $4) RETURNING id', [questionId, answer, isCorrect, response]);
         const answerId = insertAnswerQuery.rows[0].id;
         return answerId;
     } catch (err) {
@@ -77,27 +77,26 @@ async function insertAnswer(questionId, answer, isCorrect) {
 }
 
 const getQuiz = async () => { // Front-end display Quiz-Selector
-    const res = await pool.query('SELECT * FROM quizzes');
+    const res = await pool.query('SELECT * FROM quizes');
     return res.rows;
 };
 
 const getQuestionsByQuizId = async (quiz_id) => {
-    const res = await pool.query('SELECT * FROM QuizzQuestions WHERE quiz_id = $1 ORDER BY question_order', [quiz_id]);
+    const res = await pool.query('SELECT * FROM QuizQuestions WHERE quiz_id = $1 ORDER BY question_order', [quiz_id]);
     return res.rows;
 };
 
 async function getAnswersByQuestionId(question_id) {
-    const res = await pool.query('SELECT * FROM QuizzAnswers WHERE question_id = $1 ORDER BY question_id', [question_id]);
+    const res = await pool.query('SELECT * FROM QuizAnswers WHERE question_id = $1 ORDER BY question_id', [question_id]);
     return res.rows;
 }
 
-async function insertUserAnswer(userId, questionId, answer) {
-    const answeredAt = new Date();
+async function insertUserAnswer(userId, questionId, answer_id, answer) {
     const query = `
-        INSERT INTO user_answers (user_id, question_id, answer)
-        VALUES ($1, $2, $3)
+        INSERT INTO user_answers (user_id, question_id, answer_id, answer)
+        VALUES ($1, $2, $3, $4)
     `;
-    const values = [userId, questionId, answer];
+    const values = [userId, questionId, answer_id, answer];
 
     try {
         await pool.query(query, values);

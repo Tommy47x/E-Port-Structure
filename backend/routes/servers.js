@@ -81,13 +81,14 @@ app.post('/quiz', async (req, res) => {
                 break;
             case 'insertAnswer':
                 try {
+                    const response = req.body.data.response;
                     const question_id = parseInt(req.body.data.question_id);
                     if (isNaN(question_id)) {
                         res.status(400).json({ error: 'Invalid question_id' });
                         return;
                     }
                     console.log(question_id);
-                    await dbQueries.insertAnswer(question_id, req.body.data.answer, req.body.data.is_correct);
+                    await dbQueries.insertAnswer(question_id, req.body.data.answer, req.body.data.is_correct, response);
                     res.json({ success: true });
                 } catch (err) {
                     res.status(500).json({ error: err.toString() });
@@ -136,7 +137,8 @@ app.post('/questions', async (req, res) => {
                 const questionId = question.id;
                 const answer = question.answers.find(a => a.answer === selectedAnswer.selectedAnswer);
                 if (answer) {
-                    await dbQueries.insertUserAnswer(userId, questionId, answer.answer);
+                    console.log(answer.id);
+                    await dbQueries.insertUserAnswer(userId, questionId, answer.id, answer.answer);
                 }
             }
         }));

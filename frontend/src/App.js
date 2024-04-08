@@ -4,7 +4,7 @@ import AuthForm from './User/NotAuthorized';
 import Quiz from './Quiz/Quiz';
 import Elements from './Elements';
 import TermsofUse from './TermsofUse';
-import ProtectedRoute from './User/protectedRoute';
+import ProtectedRoute from './ProtectedRoute';
 import { Container } from 'react-bootstrap';
 import './App.css';
 import NotAuthorized from './User/restrictions';
