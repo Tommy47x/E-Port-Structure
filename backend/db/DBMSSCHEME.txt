@@ -23,7 +23,8 @@ CREATE TABLE QuizAnswers (
     id SERIAL,
     question_id INTEGER NOT NULL REFERENCES QuizQuestions(id),
     answer TEXT NOT NULL PRIMARY KEY,
-    is_correct BOOLEAN NOT NULL
+    is_correct BOOLEAN NOT NULL,
+    response TEXT
 );
 
 CREATE TABLE user_answers (
@@ -34,6 +35,26 @@ CREATE TABLE user_answers (
     answer TEXT NOT NULL REFERENCES QuizAnswers(answer)
 );
 
+
+
+CREATE TABLE user_answers (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id),
+  question_id INT NOT NULL REFERENCES QuizQuestions(id),
+  answer_text VARCHAR(255) NOT NULL,
+  answer_id INT NOT NULL,
+  CONSTRAINT fk_user_answers_answer_text
+  FOREIGN KEY (question_id, answer_text) REFERENCES QuizAnswers(question_id, answer_text)
+);
+
+CREATE TABLE QuizAnswers (
+    id SERIAL,
+  question_id INTEGER NOT NULL REFERENCES QuizQuestions(id),
+  answer_text VARCHAR(255) NOT NULL,
+  is_correct BOOLEAN NOT NULL,
+  response TEXT,
+  CONSTRAINT pk_quiz_answers PRIMARY KEY (question_id, answer_text)
+);
 
 
 

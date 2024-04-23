@@ -63,10 +63,26 @@ async function insertQuestion(quizId, question) {
     }
 }
 
+async function getResponse(questionId) {
+    const client = await pool.connect();
+    try {
+        const res = await client.query('SELECT response FROM QuizAnswers WHERE question_id = $1', [questionId]);
+        return res.rows;
+    }
+    catch (err) {
+        throw err;
+    }
+    finally {
+        client.release();
+    }
+}
+
+
+
 async function insertAnswer(questionId, answer, isCorrect, response) {
     const client = await pool.connect();
     try {
-        const insertAnswerQuery = await client.query('INSERT INTO QuizAnswers (question_id, answer, is_correct, response) VALUES ($1, $2, $3, $4) RETURNING id', [questionId, answer, isCorrect, response]);
+        const insertAnswerQuery = await client.query('INSERT INTO QuizAnswers (question_id, answer_text, is_correct, response) VALUES ($1, $2, $3, $4) RETURNING id', [questionId, answer, isCorrect, response]);
         const answerId = insertAnswerQuery.rows[0].id;
         return answerId;
     } catch (err) {
@@ -91,13 +107,13 @@ async function getAnswersByQuestionId(question_id) {
     return res.rows;
 }
 
-async function insertUserAnswer(userId, questionId, answer_id, answer) {
+async function insertUserAnswer(userId, questionId, answer_text, answer_id) {
     const query = `
-        INSERT INTO user_answers (user_id, question_id, answer_id, answer)
+        INSERT INTO user_answers (user_id, question_id, answer_text, answer_id)
         VALUES ($1, $2, $3, $4)
     `;
-    const values = [userId, questionId, answer_id, answer];
-
+    const values = [userId, questionId, answer_id, answer_text];
+    console.log(values);
     try {
         await pool.query(query, values);
     } catch (err) {
@@ -107,6 +123,7 @@ async function insertUserAnswer(userId, questionId, answer_id, answer) {
 
 
 module.exports = {
+    getResponse,
     insertUserAnswer,
     getAnswersByQuestionId,
     createUser,

@@ -15,6 +15,9 @@ const QuizResults = ({ responses }) => {
                     ) : (
                         <Alert variant="danger" bg="dark" data-bs-theme="dark">Your answer is incorrect.</Alert>
                     )}
+
+                    <strong>Response:</strong> {response.response}
+
                 </ListGroup.Item>
             ))}
         </ListGroup>

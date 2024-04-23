@@ -89,7 +89,7 @@ app.post('/quiz', async (req, res) => {
                     }
                     console.log(question_id);
                     await dbQueries.insertAnswer(question_id, req.body.data.answer, req.body.data.is_correct, response);
-                    res.json({ success: true });
+                    res.json({ success: true, response });
                 } catch (err) {
                     res.status(500).json({ error: err.toString() });
                 }
@@ -127,6 +127,16 @@ app.get('/questions', async (req, res) => {
 });
 
 
+app.get('/questions', async (req, res) => {
+    try {
+        const responses = await dbQueries.getResponse(req.params.questionId);
+        res.json(responses);
+    } catch (err) {
+        res.status(500).json({ error: err.toString() });
+    }
+});
+
+
 app.post('/questions', async (req, res) => {
     const { userId, selectedAnswers, questions } = req.body;
 
@@ -138,7 +148,7 @@ app.post('/questions', async (req, res) => {
                 const answer = question.answers.find(a => a.answer === selectedAnswer.selectedAnswer);
                 if (answer) {
                     console.log(answer.id);
-                    await dbQueries.insertUserAnswer(userId, questionId, answer.id, answer.answer);
+                    await dbQueries.insertUserAnswer(userId, questionId, answer.id, answer.answer_text);
                 }
             }
         }));

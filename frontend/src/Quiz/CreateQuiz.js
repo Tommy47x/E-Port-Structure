@@ -38,7 +38,8 @@ function CreateQuiz() {
     useEffect(() => {
         const fetchQuestions = async () => { // Third component that renders (Quiz Questions)
             if (quiz) {
-                const response = await fetch(`http://localhost:3000/questions?quiz_id=${quiz.id}`);
+                const response = await fetch(`http://localhost:3000/questions?quiz_id=${quiz.id}`)
+                    .catch(error => console.error('Error:', error));
                 const data = await response.json();
                 setQuestions(data);
                 setTotalQuestions(data.length);
@@ -102,7 +103,9 @@ function CreateQuiz() {
                 userId: userId,
                 selectedAnswers: selectedAnswers,
                 userData: userData,
-                questions: questions
+                questions: questions,
+
+
             })
         });
 
@@ -121,12 +124,14 @@ function CreateQuiz() {
         }
         const selectedResponse = {
             question: questions[currentQuestionIndex].question,
-            selectedAnswer: selectedAnswer.answer,
-            is_correct: selectedAnswer.is_correct
+            selectedAnswer: selectedAnswer.answer_text,
+            is_correct: selectedAnswer.is_correct,
+            response: selectedAnswer.response,
         };
         const progressPercentage = (currentQuestionIndex + 1) / totalQuestions * 100;
         setProgress(progressPercentage);
         setSelectedAnswers([...selectedAnswers, selectedResponse]);
+        console.log(selectedAnswers)
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
             setSelectedAnswerId(null);
@@ -176,13 +181,14 @@ function CreateQuiz() {
                             <Card.Title>{quiz ? `${quiz.id} | ${quiz.name}` : 'Loading...'}</Card.Title>
                             {questions.length > 0 && (
                                 <Card.Text>{questions[currentQuestionIndex].question}</Card.Text>
+
                             )}
                             <Form onSubmit={handleSubmit}>
                                 {questions[currentQuestionIndex]?.answers?.map((answer) => (
                                     <Form.Check
                                         key={answer.id}
                                         type="checkbox"
-                                        label={answer.answer}
+                                        label={answer.answer_text}
                                         checked={selectedAnswerId === answer.id} // Check this checkbox if it's the selected answer
                                         onChange={(e) => {
                                             console.log(`Checkbox for answer id ${answer.id} was checked.`);
